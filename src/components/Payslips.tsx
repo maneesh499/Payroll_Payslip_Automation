@@ -8,7 +8,7 @@ type PayslipStatus = "Generated" | "Sent" | "Pending";
 const STATUSES: PayslipStatus[] = ["Sent", "Sent", "Generated", "Sent", "Sent", "Sent", "Generated", "Sent", "Pending", "Sent"];
 
 export default function Payslips() {
-  const [previewEmployee, setPreviewEmployee] = useState<(typeof demoEmployees)[0] | null>(null);
+  const [previewEmployee, setPreviewEmployee] = useState<any | null>(null);
 
   const payslips = demoEmployees.map((emp, i) => ({
     ...emp,

@@ -79,7 +79,7 @@ export default function Reports() {
               <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, fontSize: "0.8rem" }}
-                formatter={(v: number) => [`₹${v}L`, "Gross Payroll"]}
+                formatter={(v: any) => [`₹${v}L`, "Gross Payroll"]}
               />
               <Area type="monotone" dataKey="grossPayroll" stroke="#3b5bdb" strokeWidth={2.5} fill="url(#payrollGrad)" dot={{ fill: "#3b5bdb", r: 4 }} />
             </AreaChart>
@@ -107,7 +107,7 @@ export default function Reports() {
               <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, fontSize: "0.8rem" }}
-                formatter={(v: number) => [v, "Employees"]}
+                formatter={(v: any) => [v, "Employees"]}
               />
               <Bar dataKey="employees" fill="#6366f1" radius={[6, 6, 0, 0]} />
             </BarChart>
@@ -135,7 +135,7 @@ export default function Reports() {
               <YAxis domain={[90, 100]} tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 10, fontSize: "0.8rem" }}
-                formatter={(v: number) => [`${v}%`, "Delivery Rate"]}
+                formatter={(v: any) => [`${v}%`, "Delivery Rate"]}
               />
               <Line type="monotone" dataKey="deliveryRate" stroke="#10b981" strokeWidth={2.5} dot={{ fill: "#10b981", r: 4 }} />
             </LineChart>
