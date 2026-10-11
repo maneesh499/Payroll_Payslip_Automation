@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { CheckCircle2, Send } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Send } from "lucide-react";
+
+export const FORMSPREE_ENDPOINT = "https://formspree.io/f/xljgnalo";
 
 const PAYROLL_OPTIONS = [
   { value: "", label: "How do you currently process payroll?" },
@@ -26,6 +28,8 @@ export default function DemoForm() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validate = () => {
     const newErrors: FormErrors = {};
@@ -38,15 +42,62 @@ export default function DemoForm() {
     return newErrors;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const errs = validate();
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
     }
     setErrors({});
-    setSubmitted(true);
+    setSubmitError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          company: form.company.trim(),
+          phone: form.phone.trim(),
+          employees: form.employees.trim(),
+          payrollProcess: form.payrollProcess,
+          message: form.message.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        setSubmitted(true);
+      } else {
+        let errorData: { errors?: Array<{ message?: string }> } | null = null;
+        try {
+          errorData = await response.json();
+        } catch {
+          // Non-JSON response
+        }
+
+        if (errorData && Array.isArray(errorData.errors) && errorData.errors.length > 0) {
+          const detail = errorData.errors
+            .map((err) => err.message)
+            .filter(Boolean)
+            .join(". ");
+          setSubmitError(detail || "Failed to submit request. Please try again.");
+        } else {
+          setSubmitError("Failed to submit request. Please try again or reach out to us via WhatsApp.");
+        }
+      }
+    } catch {
+      setSubmitError("Network error. Unable to reach the server. Please check your connection and try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -55,6 +106,9 @@ export default function DemoForm() {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (errors[e.target.name as keyof FormErrors]) {
       setErrors({ ...errors, [e.target.name]: undefined });
+    }
+    if (submitError) {
+      setSubmitError(null);
     }
   };
 
@@ -238,7 +292,7 @@ export default function DemoForm() {
             </div>
 
             {/* Message */}
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 24 }}>
               <label htmlFor="demo-message" className="form-label">Message</label>
               <textarea
                 id="demo-message"
@@ -252,14 +306,57 @@ export default function DemoForm() {
               />
             </div>
 
+            {submitError && (
+              <div
+                role="alert"
+                style={{
+                  marginBottom: 20,
+                  padding: "14px 16px",
+                  borderRadius: 10,
+                  backgroundColor: "#fef2f2",
+                  border: "1px solid #fecaca",
+                  color: "#b91c1c",
+                  fontSize: "0.875rem",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                  lineHeight: 1.5,
+                }}
+              >
+                <AlertCircle size={18} style={{ flexShrink: 0, marginTop: 2 }} />
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: 2 }}>Submission Failed</div>
+                  <div>{submitError}</div>
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
+              disabled={isSubmitting}
               className="btn-primary"
-              style={{ width: "100%", justifyContent: "center", fontSize: "1rem", padding: "14px 24px" }}
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                fontSize: "1rem",
+                padding: "14px 24px",
+                opacity: isSubmitting ? 0.75 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
               aria-label="Submit demo request"
+              aria-busy={isSubmitting}
             >
-              <Send size={17} />
-              Request Free Demo
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={17} className="spin-icon" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send size={17} />
+                  Request Free Demo
+                </>
+              )}
             </button>
 
             <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#94a3b8", marginTop: 16 }}>
@@ -270,6 +367,13 @@ export default function DemoForm() {
       </div>
 
       <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .spin-icon {
+          animation: spin 1s linear infinite;
+        }
         @media (max-width: 640px) {
           .form-grid { grid-template-columns: 1fr !important; }
         }

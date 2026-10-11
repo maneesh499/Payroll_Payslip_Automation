@@ -143,7 +143,8 @@ export default function Footer() {
                 <Mail size={15} />
                 Email
               </a>
-                  <a
+              {Boolean(CONTACT_CONFIG.linkedin && CONTACT_CONFIG.linkedin.trim()) && (
+                <a
                   href={CONTACT_CONFIG.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -166,6 +167,7 @@ export default function Footer() {
                   </svg>
                   LinkedIn
                 </a>
+              )}
             </div>
           </div>
         </div>
